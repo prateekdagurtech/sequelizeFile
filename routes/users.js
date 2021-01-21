@@ -4,21 +4,36 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const router = express.Router()
 
-router.post('/register', async (req, res) => {
+router.post('/register', async function (req, res) {
     try {
+        if (!req.body.password) {
+            res.send({ message: "please provide password" })
+        }
+        console.log('1111111111111111')
         const salt = bcrypt.genSaltSync(saltRounds);
-        const hash = bcrypt.hashSync(req.body.hash, salt);
+        const hash = bcrypt.hashSync(req.body.password, salt);
         req.body.hash = hash
         req.body.salt = salt
-        const user = new UsersModel(req.body);
-        let data = await user.save();
-        res.send(data)
+        console.log(UsersModel, '44444444')
+        let createUser = await UsersModel.create({
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            email: req.body.email,
+            username: req.body.username,
+            password: req.body.hash,
+            salt: req.body.salt
+        });
+        res.send(createUser)
     }
     catch (err) {
-        res.status(500).send(err);
-
+        res.status(500).send(err.message)
     }
 })
+// let data = await user.save();
+// res.send(data)
+//}
+
+
 // router.put('/delete', async (req, res) => {
 //     try {
 //         const user_id = req.user.user_id
