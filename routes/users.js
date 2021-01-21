@@ -9,7 +9,6 @@ router.post('/register', async function (req, res) {
         if (!req.body.password) {
             res.send({ message: "please provide password" })
         }
-        console.log('1111111111111111')
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(req.body.password, salt);
         req.body.hash = hash
