@@ -3,16 +3,21 @@ const sequelize = require('../database/sequelize')
 const User = sequelize.define("users", {
     firstname: {
         type: Sequelize.STRING(20),
-        required: true
+        allowNull: false
+
     },
     lastname: {
         type: Sequelize.STRING(20),
-        required: true
+        allowNull: false
+
     },
     email: {
         type: Sequelize.STRING(200),
         unique: true,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            isEmail: true
+        }
     },
     username: {
         type: Sequelize.STRING(200),
@@ -34,23 +39,13 @@ const User = sequelize.define("users", {
 
 // User.sync({ force: true }).then(function () {
 //     return User.create({
-//         firstname: 'John',
-//         lastname: 'Hancock',
-//         email: 'prateek@gmail.com',
-//         username: 'prateekdagur',
-//         password: 'dagur'
+//         firstname,
+//         lastname,
+//         email,
+//         username,
+//         password,
 
 //     });
 // });
 
-//     email: {
-//         type: Sequelize.STRING,
-//         unique: true,
-//         require: true
-//     },
-//     username: {
-//         type: Sequelize.STRING,
-//         required: true,
-//         unique: true,
-//     },
 module.exports = User
