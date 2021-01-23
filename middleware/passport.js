@@ -29,7 +29,7 @@ passport.use(new Strategy(
             access_token: token
 
         });
-        const data = await UsersAccessToken.findOneAndUpdate({ where: { "user_id": user.id } })
+        const data = await UsersAccessToken.update(UsersAccessToken, { where: { user_id: user.id } })
         return done(null, user)
     }))
 

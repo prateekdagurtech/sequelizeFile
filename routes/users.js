@@ -1,6 +1,7 @@
 const express = require('express')
 const passport = require('passport')
 const UsersModel = require('../models/user')
+const userAuthentication = require('../middleware/auth')
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const router = express.Router()
@@ -28,6 +29,23 @@ router.post('/register', async function (req, res) {
         res.status(500).send(err.message)
     }
 })
+router.post('/address', userAuthentication.auth, async (req, res) => {
+    try {
+        const user_id = req.user.user_id
+        const users = new UsersAddress.findAll(UsersAddress, { where: { user_id: user_id } })
+        let data = await users.save()
+        // let updateUser = await UsersModel.update(UsersModel, { where: { "id": req.body.user_id } }),
+        //     {
+        //         $push: {
+        //             address: data.id
+        //         }
+        //     }
+        // res.send(data);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+});
 router.delete('/delete/:id', async (req, res) => {
     try {
         const user_id = req.params.id

@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize')
 const sequelize = require('../database/sequelize')
-const User = sequelize.define("users", {
+const AccessToken = sequelize.define("users", {
     user_id: {
         type: Sequelize.STRING,
         allowNull: false
@@ -11,4 +11,4 @@ const User = sequelize.define("users", {
     },
 })
 
-module.exports = User
+module.exports = AccessToken

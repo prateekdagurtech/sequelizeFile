@@ -31,6 +31,10 @@ const User = sequelize.define("users", {
     salt: {
         type: Sequelize.STRING(200),
     },
+    address: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    }
 
 });
 
