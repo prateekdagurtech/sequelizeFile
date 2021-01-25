@@ -1,5 +1,7 @@
 const Sequelize = require('sequelize')
 const sequelize = require('../database/sequelize')
+const UsersAddress = require('../models/address')
+
 const User = sequelize.define("users", {
     firstname: {
         type: Sequelize.STRING(20),
@@ -31,25 +33,24 @@ const User = sequelize.define("users", {
     salt: {
         type: Sequelize.STRING(200),
     },
-    address: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+    address_id: {
+        type: Sequelize.INTEGER(20),
     }
 
 });
 
+User.sync({ force: true }).then(function () {
+    return User.create({
+        firstname: "",
+        lastname: "",
+        email: "",
+        username: "",
+        password: "",
+        address_id: ""
 
+    });
+});
 
-
-// User.sync({ force: true }).then(function () {
-//     return User.create({
-//         firstname,
-//         lastname,
-//         email,
-//         username,
-//         password,
-
-//     });
-// });
+User.hasMany(UsersAddress, { foreignKey: 'id' });
 
 module.exports = User

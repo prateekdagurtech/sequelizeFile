@@ -18,7 +18,7 @@ passport.use(new Strategy(
     async function (username, password, done) {
         let user = await findByCredentials(username, password)
         const payload = {
-            admin: user.id
+            user_id: user.id
         };
         const token = jwt.sign(payload, Secret_Token, {
             expiresIn: 86400
@@ -29,7 +29,12 @@ passport.use(new Strategy(
             access_token: token
 
         });
-        const data = await UsersAccessToken.update(UsersAccessToken, { where: { user_id: user.id } })
+        console.log(token_detail.access_token)
+        const data = await UsersAccessToken.create({
+            user_id: payload.user_id,
+            access_token: token_detail.access_token
+        })
+        console.log(data)
         return done(null, user)
     }))
 

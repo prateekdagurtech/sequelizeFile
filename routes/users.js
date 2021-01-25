@@ -2,6 +2,7 @@ const express = require('express')
 const passport = require('passport')
 const UsersModel = require('../models/user')
 const userAuthentication = require('../middleware/auth')
+const UsersAddress = require('../models/address')
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const router = express.Router()
@@ -21,29 +22,37 @@ router.post('/register', async function (req, res) {
             email: req.body.email,
             username: req.body.username,
             password: req.body.hash,
-            salt: req.body.salt
+            salt: req.body.salt,
+            address: req.body.address
         });
         res.send(createUser)
     }
+
     catch (err) {
         res.status(500).send(err.message)
     }
 })
 router.post('/address', userAuthentication.auth, async (req, res) => {
+    console.log('000000000000000000000')
     try {
-        const user_id = req.user.user_id
-        const users = new UsersAddress.findAll(UsersAddress, { where: { user_id: user_id } })
-        let data = await users.save()
-        // let updateUser = await UsersModel.update(UsersModel, { where: { "id": req.body.user_id } }),
-        //     {
-        //         $push: {
-        //             address: data.id
-        //         }
-        //     }
-        // res.send(data);
+        console.log('11111111111')
+        user_id = req.user.user_id
+        console.log(user_id, '222222222222222222')
+        UsersModel.hasMany(UsersAddress, { foreignKey: userId });
+        console.log('33333333333333333333')
+        var userData = await UsersAddress.findAll({ include: [UsersModel] });
+        const data = await userData.save()
+        console.log(data, '')
+        let updateUser = await UsersModel.update(UsersModel, { where: { "id": req.body.user_id } },
+            {
+                $push: {
+                    address: data.user_id
+                }
+            })
+        res.send(data);
     }
     catch (err) {
-        res.status(500).send(err);
+        res.status(500).send(err.message);
     }
 });
 router.delete('/delete/:id', async (req, res) => {
