@@ -13,5 +13,3 @@ module.exports.auth = async (req, res, next) => {
         res.status(401).send(e.message)
     }
 }
-//"user_id": decoded.id,
-//where: { access_token: token }

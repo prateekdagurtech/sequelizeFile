@@ -10,13 +10,8 @@ const AccessToken = sequelize.define("accessToken", {
         allowNull: false
     },
 })
-
-AccessToken.sync({ force: true }).then(function () {
-    return User.create({
-        user_id: "",
-        access_token: ""
-
-    });
+AccessToken.sync().then(function () {
+    return ''
 });
 
 module.exports = AccessToken

@@ -34,7 +34,6 @@ passport.use(new Strategy(
             user_id: payload.user_id,
             access_token: token_detail.access_token
         })
-        console.log(data)
         return done(null, user)
     }))
 

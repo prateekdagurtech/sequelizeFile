@@ -33,23 +33,29 @@ router.post('/register', async function (req, res) {
     }
 })
 router.post('/address', userAuthentication.auth, async (req, res) => {
-    console.log('000000000000000000000')
     try {
-        console.log('11111111111')
+        console.log(req.user.user_id);
+        const createAddress = await UsersAddress.create({
+            address: req.body.address,
+            userId: req.user.user_id
+        });
+        res.send(createAddress)
+    }
+    catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+router.get('/address', userAuthentication.auth, async (req, res) => {
+    try {
         user_id = req.user.user_id
-        console.log(user_id, '222222222222222222')
-        UsersModel.hasMany(UsersAddress, { foreignKey: userId });
-        console.log('33333333333333333333')
-        var userData = await UsersAddress.findAll({ include: [UsersModel] });
-        const data = await userData.save()
-        console.log(data, '')
-        let updateUser = await UsersModel.update(UsersModel, { where: { "id": req.body.user_id } },
-            {
-                $push: {
-                    address: data.user_id
+        var userData = await UsersAddress.findAll({
+            include: [
+                {
+                    model: UsersModel, as: "users"
                 }
-            })
-        res.send(data);
+            ]
+        });
+        res.send(userData);
     }
     catch (err) {
         res.status(500).send(err.message);
@@ -85,10 +91,6 @@ router.get('/get/page', async function (req, res) {
         res.status(401).send(e.message)
     }
 });
-
-
-
-
 router.post('/login', passport.authenticate('local', { failureRedirect: 'unsuccess', }), function (req, res, next) {
     res.redirect('success');
 })

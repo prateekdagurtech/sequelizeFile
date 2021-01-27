@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize')
 const sequelize = require('../database/sequelize')
-const UsersAddress = require('../models/address')
+const UsersAddress = require('../models/address');
 
 const User = sequelize.define("users", {
     firstname: {
@@ -32,25 +32,21 @@ const User = sequelize.define("users", {
     },
     salt: {
         type: Sequelize.STRING(200),
-    },
-    address_id: {
-        type: Sequelize.INTEGER(20),
     }
-
 });
 
-User.sync({ force: true }).then(function () {
-    return User.create({
-        firstname: "",
-        lastname: "",
-        email: "",
-        username: "",
-        password: "",
-        address_id: ""
-
-    });
+User.sync().then(function () {
+    return ''
 });
 
-User.hasMany(UsersAddress, { foreignKey: 'id' });
+User.hasMany(UsersAddress, {
+    foreignKey: 'userId',
+    as: 'addresses'
+});
+
+UsersAddress.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'users'
+});
 
 module.exports = User
