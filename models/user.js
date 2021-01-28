@@ -32,7 +32,7 @@ const User = sequelize.define("users", {
     },
     salt: {
         type: Sequelize.STRING(200),
-    }
+    },
 });
 
 User.sync().then(function () {
