@@ -6,12 +6,10 @@ const User = sequelize.define("users", {
     firstname: {
         type: Sequelize.STRING(20),
         allowNull: false
-
     },
     lastname: {
         type: Sequelize.STRING(20),
         allowNull: false
-
     },
     email: {
         type: Sequelize.STRING(200),
@@ -38,12 +36,10 @@ const User = sequelize.define("users", {
 User.sync().then(function () {
     return ''
 });
-
 User.hasMany(UsersAddress, {
     foreignKey: 'userId',
     as: 'addresses'
 });
-
 UsersAddress.belongsTo(User, {
     foreignKey: 'userId',
     as: 'users'

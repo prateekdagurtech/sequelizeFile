@@ -38,15 +38,21 @@ passport.use(new Strategy(
     }))
 
 findByCredentials = async (username, password) => {
-    const user = await UsersModel.findOne({ where: { "username": username } })
-    if (!user) {
-        throw new Error("No such username")
+    try {
+        const user = await UsersModel.findOne({ where: { "username": username } })
+        if (!user) {
+            throw new Error("No such username")
+        }
+        isMatch = await bcrypt.compare(password, user.password)
+        if (!isMatch) {
+            throw new Error("No any matches of password")
+        }
+        return user
+    } catch (e) {
+        res.status(500).send(e.message);
+
     }
-    isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) {
-        throw new Error("No any matches of password")
-    }
-    return user
 }
+
 
 module.exports = { passport: passport }

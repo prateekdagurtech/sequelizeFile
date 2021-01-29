@@ -2,6 +2,7 @@ const express = require('express')
 const passport = require('passport')
 const UsersModel = require('../models/user')
 const userAuthentication = require('../middleware/auth')
+const UsersAccessToken = require('../models/access_token')
 const forgotToken = require('../models/forgot_token')
 const UsersAddress = require('../models/address')
 const bcrypt = require('bcrypt');
@@ -29,14 +30,12 @@ router.post('/register', async function (req, res) {
         });
         res.send(createUser)
     }
-
     catch (err) {
         res.status(500).send(err.message)
     }
 })
 router.post('/address', userAuthentication.auth, async (req, res) => {
     try {
-        console.log(req.user.user_id);
         const createAddress = await UsersAddress.create({
             address: req.body.address,
             userId: req.user.user_id
@@ -50,10 +49,10 @@ router.post('/address', userAuthentication.auth, async (req, res) => {
 router.get('/address', userAuthentication.auth, async (req, res) => {
     try {
         user_id = req.user.user_id
-        var userData = await UsersAddress.findAll({
+        var userData = await UsersModel.findAll({
             include: [
                 {
-                    model: UsersModel, as: "users"
+                    model: UsersAddress, as: "addresses"
                 }
             ]
         });
@@ -67,6 +66,8 @@ router.delete('/delete/:id', async (req, res) => {
     try {
         const user_id = req.params.id
         const deleteUser = await UsersModel.destroy({ where: { "id": user_id } })
+        const deleteAddress = await UsersAddress.destroy({ where: { "id": user_id } })
+        const deleteAccessToken = await UsersAccessToken.destroy({ where: { "user_id": user_id } })
         res.json({ message: 'user deleted' })
     } catch (e) {
         res.status(401).send(e.message)
@@ -86,8 +87,7 @@ router.get('/get/page', async function (req, res) {
         const limit = parseInt(req.query.limit) || 3
         const page = parseInt(req.query.page_no) || 1
         const skip = limit * (page - 1)
-
-        users = await UsersModel.findAll({ limit: limit, offset: skip });
+        const users = await UsersModel.findAll({ limit: limit, offset: skip });
         res.send(users)
     } catch (e) {
         res.status(401).send(e.message)
@@ -96,18 +96,6 @@ router.get('/get/page', async function (req, res) {
 router.post('/login', passport.authenticate('local', { failureRedirect: 'unsuccess', }), function (req, res, next) {
     res.redirect('success');
 })
-findByCredentials = async (username, password) => {
-    const user = await UsersModel.findOne({ where: { "username": username } })
-
-    if (!user) {
-        throw new Error("No such username")
-    }
-    isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) {
-        throw new Error("No any matches of password")
-    }
-    return user
-}
 router.get('/success', async function (req, res) {
     res.json({
         status: true,
@@ -120,7 +108,6 @@ router.get('/unsuccess', function (req, res) {
         message: "unable to login, try again... check username or password"
     })
 });
-
 router.post('/forgot', async function (req, res) {
     try {
         const username = req.body.username
@@ -143,7 +130,6 @@ router.post('/forgot', async function (req, res) {
         res.status(500).send(err.message);
     }
 });
-
 router.post('/reset', async function (req, res) {
     try {
         const forgot = req.headers.forgottoken
@@ -154,7 +140,7 @@ router.post('/reset', async function (req, res) {
         if (!forToken) {
             throw new Error("No token or has expired")
         }
-        //  const newPassword = req.body.password
+
         if (!req.body.password) {
             res.send({ message: "please provide password" })
         }
@@ -165,17 +151,14 @@ router.post('/reset', async function (req, res) {
         console.log(req.body.hash)
         const updatePassword = await UsersModel.update(
             { password: req.body.hash }, { where: { username: req.body.username } })
-        console.log(updatePassword, '11111111111111111')
+        res.json({
+            message: 'user has been updated'
+        })
     }
-
-
     catch (err) {
         res.status(500).send(err.message);
 
     }
 });
-
-
-
 
 module.exports = router
