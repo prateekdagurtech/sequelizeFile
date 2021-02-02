@@ -29,11 +29,11 @@ const sendGridMailUpdate = (email, username) => {
         to: email,
         from: 'prateekdagur8@gmail.com',
         subject: 'Sending with SendGrid',
-        text: `user ${username} has been updated`,
+        text: `hii ${username} your account is updated`
 
     })
 }
-const sendGridMailForgot = (email, token) => {
+const sendGridForgotPassword = (email, token) => {
     sgMail.send({
         to: email,
         from: 'prateekdagur8@gmail.com',
@@ -42,18 +42,15 @@ const sendGridMailForgot = (email, token) => {
 
     })
 }
-// console.log('111111111111111')
-// console.log(msg)
-// sgMail.send(msg)
-//     .then((aaaa) => {
-//         console.log('Email sent', '111111111111111111111111111111111111')
-//         console.log(aaaa)
-//     })
-//     .catch((error) => {
-//         console.error(error)
-//     })
+const sendGridResetPassword = (email, name) => {
+    sgMail.send({
+        to: email,
+        from: 'prateekdagur8@gmail.com',
+        subject: 'Sending with SendGrid',
+        text: `hii ${name} your password has been updated successfully`,
 
-
+    })
+}
 router.post('/register', async function (req, res) {
     try {
         if (!req.body.password) {
@@ -167,23 +164,20 @@ router.get('/unsuccess', function (req, res) {
 });
 router.post('/forgot', async function (req, res) {
     try {
-        const username = req.body.username
-        console.log(username)
-        const user = await UsersModel.findAll({ where: { "username": username } })
+        const email = req.body.email
+        console.log(email)
+        const user = await UsersModel.findAll({ where: { "email": email } })
         console.log(user)
         if (!(user && user.length)) {
-            throw new Error("No such username exists")
+            throw new Error("No such email exists")
         }
         const token = randToken.generate(16);
-
         req.body.token = token
         const createToken = await forgotToken.create({
             resetPasswordToken: req.body.token,
-            username: req.body.username
+            email: req.body.email
         });
-
-        sendGridMailForgot(user.email, createToken.resetPasswordToken)
-
+        sendGridForgotPassword(createToken.email, createToken.resetPasswordToken)
         res.send(createToken)
     }
     catch (err) {
@@ -200,7 +194,6 @@ router.post('/reset', async function (req, res) {
         if (!forToken) {
             throw new Error("No token or has expired")
         }
-
         if (!req.body.password) {
             res.send({ message: "please provide password" })
         }
@@ -210,8 +203,9 @@ router.post('/reset', async function (req, res) {
         req.body.hash = hash
         console.log(req.body.hash)
         const updatePassword = await UsersModel.update(
-            { password: req.body.hash }, { where: { username: req.body.username } })
-
+            { password: req.body.hash }, { where: { email: req.body.email } })
+        const user = await UsersModel.findOne({ where: { "email": req.body.email } })
+        sendGridResetPassword(user.email, user.name)
         res.json({
             message: 'user has been updated'
         })

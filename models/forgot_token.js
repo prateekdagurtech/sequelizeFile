@@ -1,8 +1,8 @@
 const Sequelize = require('sequelize')
 const sequelize = require('../database/sequelize')
 const forgotTokens = sequelize.define("forgotTokens", {
-    username: {
-        type: Sequelize.STRING(20),
+    email: {
+        type: Sequelize.STRING(200),
         allowNull: false
     },
     resetPasswordToken: {
