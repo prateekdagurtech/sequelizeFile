@@ -205,7 +205,7 @@ router.post('/reset', async function (req, res) {
         const updatePassword = await UsersModel.update(
             { password: req.body.hash }, { where: { email: req.body.email } })
         const user = await UsersModel.findOne({ where: { "email": req.body.email } })
-        sendGridResetPassword(user.email, user.name)
+        sendGridResetPassword(user.email, user.firstname)
         res.json({
             message: 'user has been updated'
         })
