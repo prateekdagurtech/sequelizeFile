@@ -33,12 +33,13 @@ const sendGridMailUpdate = (email, username) => {
 
     })
 }
-const sendGridForgotPassword = (email, token) => {
+const sendGridForgotPassword = (email, link) => {
     sgMail.send({
         to: email,
         from: 'prateekdagur8@gmail.com',
         subject: 'Sending with SendGrid',
-        text: `user has ${token} link`,
+        text: 'click on this link to reset the password',
+        html: link
 
     })
 }
@@ -167,7 +168,7 @@ router.post('/forgot', async function (req, res) {
         const email = req.body.email
         console.log(email)
         const user = await UsersModel.findAll({ where: { "email": email } })
-        console.log(user)
+
         if (!(user && user.length)) {
             throw new Error("No such email exists")
         }
@@ -177,16 +178,21 @@ router.post('/forgot', async function (req, res) {
             resetPasswordToken: req.body.token,
             email: req.body.email
         });
-        sendGridForgotPassword(createToken.email, createToken.resetPasswordToken)
-        res.send(createToken)
+
+        const link = `${req.protocol}://localhost:3000/user/reset/${createToken.resetPasswordToken}`
+        sendGridForgotPassword(createToken.email, link)
+        res.json({
+            message: `Dear ${user.firstname} link has been sent to reset your password`
+        })
     }
     catch (err) {
         res.status(500).send(err.message);
     }
 });
-router.post('/reset', async function (req, res) {
+router.post('/reset/:token', async function (req, res) {
     try {
-        const forgot = req.headers.forgottoken
+        const forgot = req.params.token
+        console.log(forgot)
         const forToken = await forgotToken.findAll({
             where: { "resetPasswordToken": forgot }
         });
