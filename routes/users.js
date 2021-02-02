@@ -9,6 +9,50 @@ const bcrypt = require('bcrypt');
 const randToken = require('rand-token')
 const saltRounds = 10;
 const router = express.Router()
+const sgMail = require('@sendgrid/mail')
+
+
+const sendgridAPIKey = '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'
+sgMail.setApiKey(sendgridAPIKey)
+const sendGridMail = (email, name) => {
+    sgMail.send({
+        to: email,
+        from: 'prateekdagur8@gmail.com',
+        subject: 'Sending with SendGrid',
+        text: `user ${name} has been created`,
+
+    })
+}
+
+const sendGridMailUpdate = (email, username) => {
+    sgMail.send({
+        to: email,
+        from: 'prateekdagur8@gmail.com',
+        subject: 'Sending with SendGrid',
+        text: `user ${username} has been updated`,
+
+    })
+}
+const sendGridMailForgot = (email, token) => {
+    sgMail.send({
+        to: email,
+        from: 'prateekdagur8@gmail.com',
+        subject: 'Sending with SendGrid',
+        text: `user has ${token} link`,
+
+    })
+}
+// console.log('111111111111111')
+// console.log(msg)
+// sgMail.send(msg)
+//     .then((aaaa) => {
+//         console.log('Email sent', '111111111111111111111111111111111111')
+//         console.log(aaaa)
+//     })
+//     .catch((error) => {
+//         console.error(error)
+//     })
+
 
 router.post('/register', async function (req, res) {
     try {
@@ -28,6 +72,7 @@ router.post('/register', async function (req, res) {
             salt: req.body.salt,
             address: req.body.address
         });
+        sendGridMail(createUser.email, createUser.firstname)
         res.send(createUser)
     }
     catch (err) {
@@ -69,6 +114,18 @@ router.delete('/delete/:id', async (req, res) => {
         const deleteAddress = await UsersAddress.destroy({ where: { "id": user_id } })
         const deleteAccessToken = await UsersAccessToken.destroy({ where: { "user_id": user_id } })
         res.json({ message: 'user deleted' })
+    } catch (e) {
+        res.status(401).send(e.message)
+    }
+});
+router.patch('/update/:id', async (req, res) => {
+    try {
+        const user_id = req.params.id
+        const createUpdate = await UsersModel.update(
+            { firstname: req.body.firstname, lastname: req.body.lastname }, { where: { "id": user_id } })
+        const users = await UsersModel.findOne({ where: { "id": user_id } })
+        sendGridMailUpdate(users.email, users.username)
+        res.json({ message: 'user updated' })
     } catch (e) {
         res.status(401).send(e.message)
     }
@@ -124,6 +181,9 @@ router.post('/forgot', async function (req, res) {
             resetPasswordToken: req.body.token,
             username: req.body.username
         });
+
+        sendGridMailForgot(user.email, createToken.resetPasswordToken)
+
         res.send(createToken)
     }
     catch (err) {
@@ -151,6 +211,7 @@ router.post('/reset', async function (req, res) {
         console.log(req.body.hash)
         const updatePassword = await UsersModel.update(
             { password: req.body.hash }, { where: { username: req.body.username } })
+
         res.json({
             message: 'user has been updated'
         })
