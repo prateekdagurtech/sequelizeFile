@@ -166,9 +166,8 @@ router.get('/unsuccess', function (req, res) {
 router.post('/forgot', async function (req, res) {
     try {
         const email = req.body.email
-        console.log(email)
         const user = await UsersModel.findAll({ where: { "email": email } })
-
+        console.log(user)
         if (!(user && user.length)) {
             throw new Error("No such email exists")
         }
@@ -182,7 +181,7 @@ router.post('/forgot', async function (req, res) {
         const link = `${req.protocol}://localhost:3000/user/reset/${createToken.resetPasswordToken}`
         sendGridForgotPassword(createToken.email, link)
         res.json({
-            message: `Dear ${user.firstname} link has been sent to reset your password`
+            message: `Dear ${user[0].firstname} link has been sent to reset your password`
         })
     }
     catch (err) {
